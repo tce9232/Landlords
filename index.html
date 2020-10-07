@@ -1,0 +1,199 @@
+   
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset='utf-8' />
+  <title>Madison Landlord Map</title>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+
+    .quakeInfo {
+      position: absolute;
+      font-family: sans-serif;
+      margin-top: 5px;
+      margin-left: 5px;
+      padding: 5px;
+      width: 30%;
+      border: 2px solid black;
+      font-size: 14px;
+      color: #222;
+      background-color: #fff;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id='map'></div>
+  <div class='quakeInfo'>
+    <div><strong>Landlord:</strong> <span id='name'></span></div>
+    <div><strong>Address:</strong> <span id='address'></span></div>
+    <div><strong>Property Value:</strong> <span id='value'></span></div>
+    <div><strong>Property Type:</strong> <span id='type'></span></div>
+    <div><strong>Total Number of Properties:</strong> <span id='total_num'></span></div>
+    <div><strong>Total Value of Properties:</strong> <span id='total_value'></span></div>
+  </div>
+
+  <script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoidGVkY2ExMjMiLCJhIjoiY2s5Z2VzZHRrMG4waTNrbndrNzdlbTdhMSJ9.20o57usCauX4WzpxsZxXMg';
+    var map = new mapboxgl.Map({
+      container: 'map', // Specify the container ID
+      style: 'mapbox://styles/mapbox/outdoors-v11', // Specify which map style to use
+      center: [-89.4012, 43.0731], // Specify the starting position [lng, lat]
+      zoom: 11 // Specify the starting zoom
+    });
+
+    // Target the relevant span tags in the quakeInfo div
+    var nameDisplay = document.getElementById('name');
+    var addressDisplay = document.getElementById('address');
+    var valueDisplay = document.getElementById('value');
+    var typeDisplay = document.getElementById('type');
+    var totvalueDisplay = document.getElementById('total_value');
+    var totnumDisplay = document.getElementById('total_num');
+
+
+    map.on('load', function() {
+
+      map.addSource('landlords', {
+        'type': 'geojson',
+        'data': 'landlords.geojson',
+        'generateId': true // This ensures that all features have unique IDs
+        
+      });
+
+      map.addLayer({
+        'id': 'landlords-viz',
+        'type': 'circle',
+        'source': 'landlords',
+        'paint': {
+          // The feature-state dependent circle-radius expression will render
+          // the radius size according to its magnitude when
+          // a feature's hover state is set to true
+          'circle-radius': 4,
+          'circle-stroke-color': '#000',
+          'circle-stroke-width': 1,
+          // The feature-state dependent circle-color expression will render
+          // the color according to its magnitude when
+          // a feature's hover state is set to true
+          'circle-color': [
+            'case',
+            // ['boolean',
+            //   ['feature-state', 'hover'],
+            //   false
+            // ],
+            true,
+            [
+              'interpolate', ['linear'],
+              ['get', 'total_value'],
+              500000, '#fff7ec',
+              1000000, '#fee8c8',
+              2000000, '#fdd49e',
+              3000000, '#fdbb84',
+              5000000, '#fc8d59',
+              7500000, '#ef6548',
+              10000000, '#d7301f',
+              20000000, '#b30000',
+              500000000, '#7f0000',
+              1000000000, '#000'
+            ],
+            '#000'
+          ]
+        }
+      });
+
+    });
+
+    var addressID = null;
+
+    map.on('click', 'landlords-viz', (e) => {
+      console.log(e)
+      map.setPaintProperty(e, 'fill-color', '#000');
+
+    });
+
+    map.on('mousemove', 'landlords-viz', (e) => {
+
+      map.getCanvas().style.cursor = 'pointer';
+      // Set variables equal to the current feature's magnitude, location, and time
+      var landlordName = e.features[0].properties.owner;
+      console.log(e.features[0].properties)
+      var propAddress = e.features[0].properties.address;
+      var propValue = e.features[0].properties.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      var propType = e.features[0].properties.property_type;
+      var totValue = e.features[0].properties.total_value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      var totNum = e.features[0].properties.Num_Properties.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+      // Check whether features exist
+      if (e.features.length > 0) {
+        // Display the magnitude, location, and time in the sidebar
+        nameDisplay.textContent = landlordName;
+        addressDisplay.textContent = propAddress;
+        valueDisplay.textContent = propValue;
+        typeDisplay.textContent = propType;
+        totvalueDisplay.textContent = totValue;
+        totnumDisplay.textContent = totNum;
+
+        // If addressID for the hovered feature is not null,
+        // use removeFeatureState to reset to the default behavior
+        if (addressID) {
+          map.removeFeatureState({
+            source: "landlords",
+            id: addressID
+          });
+        }
+
+        addressID = e.features[0].id;
+
+        // When the mouse moves over the landlords-viz layer, set the
+        // feature state for the feature under the mouse
+        map.setFeatureState({
+          source: 'landlords',
+          id: addressID,
+        }, {
+          hover: true
+        });
+
+      }
+    });
+
+    map.on("mouseleave", "landlords-viz", function() {
+
+      if (addressID) {
+        map.setFeatureState({
+          source: 'landlords',
+          id: addressID
+        }, {
+          hover: false
+        });
+      }
+      addressID = null;
+      // Remove the information from the previously hovered feature from the sidebar
+      nameDisplay.textContent = '';
+      addressDisplay.textContent = '';
+      valueDisplay.textContent = '';
+      typeDisplay.textContent = '';
+      totvalueDisplay.textContent = '';
+      totnumDisplay.textContent = '';
+      // Reset the cursor style
+      map.getCanvas().style.cursor = '';
+    });
+  </script>
+
+</body>
+
+</html>
