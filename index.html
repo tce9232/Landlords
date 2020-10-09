@@ -40,6 +40,7 @@
 <body>
 
   <div id='map'></div>
+  <div id="map-overlay" class="map-overlay"></div>
   <div class='quakeInfo'>
     <div><strong>Landlord:</strong> <span id='name'></span></div>
     <div><strong>Address:</strong> <span id='address'></span></div>
@@ -66,6 +67,11 @@
     var totvalueDisplay = document.getElementById('total_value');
     var totnumDisplay = document.getElementById('total_num');
 
+    // Create a popup, but don't add it to the map yet.
+    var popup = new mapboxgl.Popup({
+    closeButton: false
+    });
+
 
     map.on('load', function() {
 
@@ -81,57 +87,96 @@
         'type': 'circle',
         'source': 'landlords',
         'paint': {
-          // The feature-state dependent circle-radius expression will render
-          // the radius size according to its magnitude when
-          // a feature's hover state is set to true
-          'circle-radius': 4,
-          'circle-stroke-color': '#000',
-          'circle-stroke-width': 1,
-          // The feature-state dependent circle-color expression will render
-          // the color according to its magnitude when
-          // a feature's hover state is set to true
-          'circle-color': [
-            'case',
-            // ['boolean',
-            //   ['feature-state', 'hover'],
-            //   false
-            // ],
-            true,
-            [
-              'interpolate', ['linear'],
-              ['get', 'total_value'],
-              500000, '#fff7ec',
-              1000000, '#fee8c8',
-              2000000, '#fdd49e',
-              3000000, '#fdbb84',
-              5000000, '#fc8d59',
-              7500000, '#ef6548',
-              10000000, '#d7301f',
-              20000000, '#b30000',
-              500000000, '#7f0000',
-              1000000000, '#000'
-            ],
-            '#000'
-          ]
-        }
-      });
+          'circle-color': '#000',
+          'circle-opacity': .2,
+          
+          }
+        // 'paint': {
+        //   // The feature-state dependent circle-radius expression will render
+        //   // the radius size according to its magnitude when
+        //   // a feature's hover state is set to true
+        //   'circle-radius': 4,
+        //   'circle-stroke-color': '#000',
+        //   'circle-stroke-width': 1,
+        //   // The feature-state dependent circle-color expression will render
+        //   // the color according to its magnitude when
+        //   // a feature's hover state is set to true
+        //   'circle-color': [
+        //     'case',
+        //     // ['boolean',
+        //     //   ['feature-state', 'hover'],
+        //     //   false
+        //     // ],
+        //     true,
+        //     [
+        //       'interpolate', ['linear'],
+        //       ['get', 'total_value'],
+        //       500000, '#fff7ec',
+        //       1000000, '#fee8c8',
+        //       2000000, '#fdd49e',
+        //       3000000, '#fdbb84',
+        //       5000000, '#fc8d59',
+        //       7500000, '#ef6548',
+        //       10000000, '#d7301f',
+        //       20000000, '#b30000',
+        //       500000000, '#7f0000',
+        //       1000000000, '#000'
+        //     ],
+        //     '#000'
+        //   ]
+        // }
+        
+      }
+      
+      ,
+      'settlement-label');
+
+
+    map.addLayer(
+      {
+      'id': 'counties-highlighted',
+      'type': 'circle',
+      'source': 'landlords',
+      'paint': {
+      'circle-color': '#C959CE',
+      "circle-stroke-width": 1,
+      "circle-stroke-color": '#000'
+      },
+      'filter': ['in', 'owner', '']
+      },
+      'settlement-label'
+      ); // Place polygon under these labels.
 
     });
+
 
     var addressID = null;
 
     map.on('click', 'landlords-viz', (e) => {
-      console.log(e)
-      map.setPaintProperty(e, 'fill-color', '#000');
 
-    });
+      // Single out the first found feature.
+      var feature = e.features[0];
+      console.log(feature.properties)
 
-    map.on('mousemove', 'landlords-viz', (e) => {
+      // Query the counties layer visible in the map. Use the filter
+      // param to only collect results that share the same county name.
+      var relatedFeatures = map.querySourceFeatures('landlords', {
+      filter: ['in', 'owner', feature.properties.owner]
+      });
+
+      console.log(relatedFeatures)
+
+        
+      // Add features that share the same county name to the highlighted layer.
+      map.setFilter('counties-highlighted', [
+      'in',
+      'owner',
+      feature.properties.owner
+      ]);
 
       map.getCanvas().style.cursor = 'pointer';
       // Set variables equal to the current feature's magnitude, location, and time
       var landlordName = e.features[0].properties.owner;
-      console.log(e.features[0].properties)
       var propAddress = e.features[0].properties.address;
       var propValue = e.features[0].properties.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       var propType = e.features[0].properties.property_type;
@@ -169,9 +214,27 @@
         });
 
       }
+        
+    });
+
+    map.on('mousemove', 'landlords-viz', (e) => {
+
+      var feature = e.features[0];
+
+      map.getCanvas().style.cursor = 'pointer';
+
+      popup
+        .setLngLat(e.lngLat)
+        .setText(feature.properties.owner)
+        .addTo(map);
+      
     });
 
     map.on("mouseleave", "landlords-viz", function() {
+
+      popup.remove();
+
+      map.getCanvas().style.cursor = 'pointer';
 
       if (addressID) {
         map.setFeatureState({
@@ -181,14 +244,6 @@
           hover: false
         });
       }
-      addressID = null;
-      // Remove the information from the previously hovered feature from the sidebar
-      nameDisplay.textContent = '';
-      addressDisplay.textContent = '';
-      valueDisplay.textContent = '';
-      typeDisplay.textContent = '';
-      totvalueDisplay.textContent = '';
-      totnumDisplay.textContent = '';
       // Reset the cursor style
       map.getCanvas().style.cursor = '';
     });
