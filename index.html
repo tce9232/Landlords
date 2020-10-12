@@ -54,7 +54,7 @@
     mapboxgl.accessToken = 'pk.eyJ1IjoidGVkY2ExMjMiLCJhIjoiY2s5Z2VzZHRrMG4waTNrbndrNzdlbTdhMSJ9.20o57usCauX4WzpxsZxXMg';
     var map = new mapboxgl.Map({
       container: 'map', // Specify the container ID
-      style: 'mapbox://styles/mapbox/outdoors-v11', // Specify which map style to use
+      style: 'mapbox://styles/mapbox/light-v10', // Specify which map style to use
       center: [-89.4012, 43.0731], // Specify the starting position [lng, lat]
       zoom: 11 // Specify the starting zoom
     });
@@ -86,9 +86,12 @@
         'id': 'landlords-viz',
         'type': 'circle',
         'source': 'landlords',
+        
         'paint': {
+          'circle-radius': 3,
           'circle-color': '#000',
-          'circle-opacity': .1,
+          'circle-opacity': .5,
+
           
           }
         
@@ -104,8 +107,9 @@
       'type': 'circle',
       'source': 'landlords',
       'paint': {
+      'circle-radius': 4.5,
       'circle-color': '#C959CE',
-      "circle-stroke-width": 1,
+      "circle-stroke-width": .5,
       "circle-stroke-color": '#000'
       },
       'filter': ['in', 'owner', '']
@@ -113,18 +117,24 @@
       'settlement-label'
       ); // Place polygon under these labels.
 
-      map.addLayer(
-      {
-      'id': 'counties-unhighlighted',
-      'type': 'circle',
-      'source': 'landlords',
-      'paint': {
-      "circle-opacity": .2
-      },
-      'filter': ['!=', 'owner', '']
-      },
-      'settlement-label'
-      ); // Place polygon under these labels.
+      // map.addLayer(
+      // {
+      // 'id': 'counties-unhighlighted',
+      // 'type': 'circle',
+      // 'source': 'landlords',
+      // 'paint': {
+      // 'circle-color': '#fff',
+      // "circle-opacity": .01
+      // },
+      // 'filter': ['!in', 'owner', '']
+      // },
+      // 'settlement-label'
+      // ); 
+      
+
+      map.on('click', 'landlords-viz', (e) => {
+
+});
 
     });
 
@@ -139,11 +149,11 @@
 
       // Query the counties layer visible in the map. Use the filter
       // param to only collect results that share the same county name.
-      var relatedFeatures = map.querySourceFeatures('landlords', {
-      filter: ['in', 'owner', feature.properties.owner]
+      var unrelatedFeatures = map.querySourceFeatures('landlords', {
+      filter: ['!in', 'owner', feature.properties.owner]
       });
 
-      console.log(relatedFeatures)
+      console.log(unrelatedFeatures)
 
         
       // Add features that share the same county name to the highlighted layer.
@@ -153,11 +163,7 @@
       feature.properties.owner
       ]);
 
-      map.setFilter('counties-unhighlighted', [
-      '!=',
-      'owner',
-      feature.properties.owner
-      ]);
+      
 
       map.getCanvas().style.cursor = 'pointer';
       // Set variables equal to the current feature's magnitude, location, and time
@@ -202,18 +208,7 @@
         
     });
 
-    // map.on('mousemove', 'landlords-viz', (e) => {
-
-    //   var feature = e.features[0];
-
-    //   map.getCanvas().style.cursor = 'pointer';
-
-    //   popup
-    //     .setLngLat(e.lngLat)
-    //     .setText(feature.properties.owner)
-    //     .addTo(map);
-      
-    // });
+    
 
     map.on("mouseleave", "landlords-viz", function() {
 
