@@ -47,6 +47,7 @@
     <div><strong>Property Value:</strong> <span id='value'></span></div>
     <div><strong>Property Type:</strong> <span id='type'></span></div>
     <div><strong>Total Number of Properties:</strong> <span id='total_num'></span></div>
+    <div><strong>Total Number of Units:</strong> <span id='total_Units'></span></div>
     <div><strong>Total Value of Properties:</strong> <span id='total_value'></span></div>
   </div>
 
@@ -66,6 +67,7 @@
     var typeDisplay = document.getElementById('type');
     var totvalueDisplay = document.getElementById('total_value');
     var totnumDisplay = document.getElementById('total_num');
+    var totunitDisplay = document.getElementById('total_Units');
 
     // // Create a popup, but don't add it to the map yet.
     // var popup = new mapboxgl.Popup({
@@ -164,6 +166,7 @@
       var propType = e.features[0].properties.property_type;
       var totValue = e.features[0].properties.total_value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       var totNum = e.features[0].properties.Num_Properties.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      var totUnits = e.features[0].properties.Num_Units.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
       // Check whether features exist
       if (e.features.length > 0) {
@@ -174,6 +177,7 @@
         typeDisplay.textContent = propType;
         totvalueDisplay.textContent = totValue;
         totnumDisplay.textContent = totNum;
+        totunitDisplay.textContent = totUnits;
 
         // If addressID for the hovered feature is not null,
         // use removeFeatureState to reset to the default behavior
