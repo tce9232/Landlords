@@ -74,7 +74,7 @@
 
 
     map.on('load', function() {
-
+      var visibility = "not filtered";
       map.addSource('landlords', {
         'type': 'geojson',
         'data': 'landlords.geojson',
@@ -91,19 +91,15 @@
           'circle-radius': 3,
           'circle-color': '#000',
           'circle-opacity': .5,
-
-          
           }
-        
       }
-      
       ,
       'settlement-label');
 
 
     map.addLayer(
       {
-      'id': 'counties-highlighted',
+      'id': 'props_highlighted',
       'type': 'circle',
       'source': 'landlords',
       'paint': {
@@ -117,24 +113,23 @@
       'settlement-label'
       ); // Place polygon under these labels.
 
-      // map.addLayer(
-      // {
-      // 'id': 'counties-unhighlighted',
-      // 'type': 'circle',
-      // 'source': 'landlords',
-      // 'paint': {
-      // 'circle-color': '#fff',
-      // "circle-opacity": .01
-      // },
-      // 'filter': ['!in', 'owner', '']
-      // },
-      // 'settlement-label'
-      // ); 
+      
       
 
       map.on('click', 'landlords-viz', (e) => {
 
-});
+        var feature = e.features[0];
+        // toggle layer visibility by changing the layout object's visibility property
+        if (visibility === "not filtered") {
+        map.setFilter('landlords-viz', ['in', 'owner', feature.properties.owner]);
+        visibility = "filtered"
+
+        } else {
+        map.setFilter('landlords-viz', null);
+        visibility = "not filtered"
+        }
+        });
+
 
     });
 
@@ -145,19 +140,15 @@
 
       // Single out the first found feature.
       var feature = e.features[0];
-      console.log(feature.properties)
 
       // Query the counties layer visible in the map. Use the filter
       // param to only collect results that share the same county name.
       var unrelatedFeatures = map.querySourceFeatures('landlords', {
       filter: ['!in', 'owner', feature.properties.owner]
       });
-
-      console.log(unrelatedFeatures)
-
-        
+      
       // Add features that share the same county name to the highlighted layer.
-      map.setFilter('counties-highlighted', [
+      map.setFilter('props_highlighted', [
       'in',
       'owner',
       feature.properties.owner
@@ -210,7 +201,7 @@
 
     
 
-    map.on("mouseleave", "landlords-viz", function() {
+    map.on("mouseleave", "props_highlighted", function() {
 
       // popup.remove();
 
