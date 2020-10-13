@@ -166,6 +166,8 @@
       var propType = e.features[0].properties.property_type;
       var totValue = e.features[0].properties.total_value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       var totNum = e.features[0].properties.Num_Properties.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      propValue = "$" + propValue;
+      totValue = "$" + totValue;
       // var totUnits = e.features[0].properties.Num_Units.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
       // Check whether features exist
