@@ -49,6 +49,10 @@
     <div><strong>Total Number of Properties:</strong> <span id='total_num'></span></div>
     <div><strong>Total Number of Units:</strong> <span id='total_Units'></span></div>
     <div><strong>Total Value of Properties:</strong> <span id='total_value'></span></div>
+    <button onclick="reset_map()" type="reset" value="Reset">Reset Map</button>
+  </div>
+  <div class='ResetButton'>
+    
   </div>
 
   <script>
@@ -131,6 +135,8 @@
         visibility = "not filtered"
         }
         });
+
+        
 
 
     });
@@ -224,6 +230,11 @@
       // Reset the cursor style
       map.getCanvas().style.cursor = '';
     });
+
+    function reset_map() {
+        map.setFilter('landlords-viz', null);
+        visibility = "not filtered"
+        }
   </script>
 
 </body>
