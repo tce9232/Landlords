@@ -18,10 +18,16 @@ Once this owner name cleaning was done, I was able to calculate the number of un
 
 At this point, I had to make a decision about which properties should be included in this dataset. I didn't want to include private personal properties, but I still wanted to make sure I was including houses that got split into floors and were leased out, as constitute a majority of the units around campus. For these reasons, I included any apartments or single family homes that were either owned by somebody with multiple properties or had a value over $1 million. This isn't a perfect metric, as there are obviously private homes worth more than $1 million in Madison, but it was the only way I found to ensure the inclusion of large apartment complexes that were, for whatever reason, classified as single family homes. 
 
-
+Once I finalized the properties that would be included in the visualization, I converted each of their text addresses into long-lats using GeoPy. This allowed me to convert the data into a GeoJSON format, which is easily readable by Mapbox.
 
 ## Plotting with Mapbox
 
+The goal for this visualization was to give the user some basic statistics for Madison properties both on the individual property and property owner levels. The constantly floating tooltip in the upper left corner gives the user these stats about whichever property was the last one they hovered over. 
+
+Since there are so many properties, I also found it important to let the user only focus on those that are of interest to them. Whenever you're hovering over a property, it's highlighted pink, as well as any other properties that are owned by the same landlord. There's also a toggle built in that lets you click on any individual property remove any points on the map that aren't owned by the same landlord. This can all be reset by clicking the "reset map" button or any blank area.
+
 ## Publishing to Heroku
 
+In order to grant easy access to this map, I've published it to Heroku under the address [madison-landlords.herokuapp.com](madison-landlords.herokuapp.com). 
 
+Although I believe this map can be informative as is, I welcome any feedback or feature improvements to either the data consolidation, cleaning or visualization processes. 
