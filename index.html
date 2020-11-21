@@ -149,12 +149,6 @@
       // Single out the first found feature.
       var feature = e.features[0];
 
-      // Query the counties layer visible in the map. Use the filter
-      // param to only collect results that share the same county name.
-      var unrelatedFeatures = map.querySourceFeatures('landlords', {
-      filter: ['!in', 'owner', feature.properties.owner]
-      });
-      
       // Add features that share the same county name to the highlighted layer.
       map.setFilter('props_highlighted', [
       'in',
@@ -214,10 +208,7 @@
     
 
     map.on("mouseleave", "props_highlighted", function() {
-
-      // popup.remove();
-
-      map.getCanvas().style.cursor = 'pointer';
+    map.getCanvas().style.cursor = 'pointer';
 
       if (addressID) {
         map.setFeatureState({
@@ -235,6 +226,8 @@
         map.setFilter('landlords-viz', null);
         visibility = "not filtered"
         }
+
+        map.setFilter('props-highlighted', ['in', 'owner', 0]);
   </script>
 
 </body>
