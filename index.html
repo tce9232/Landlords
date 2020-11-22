@@ -64,7 +64,7 @@
       zoom: 11 // Specify the starting zoom
     });
 
-    // Target the relevant span tags in the quakeInfo div
+    // Target the relevant span tags in the Info div
     var nameDisplay = document.getElementById('name');
     var addressDisplay = document.getElementById('address');
     var valueDisplay = document.getElementById('value');
@@ -73,12 +73,7 @@
     var totnumDisplay = document.getElementById('total_num');
     var totunitDisplay = document.getElementById('total_Units');
 
-    // // Create a popup, but don't add it to the map yet.
-    // var popup = new mapboxgl.Popup({
-    // closeButton: false
-    // });
-
-
+    
     map.on('load', function() {
       var visibility = "not filtered";
       map.addSource('landlords', {
@@ -117,7 +112,7 @@
       'filter': ['in', 'owner', '']
       },
       'settlement-label'
-      ); // Place polygon under these labels.
+      ); 
 
       
       
@@ -159,7 +154,7 @@
       
 
       map.getCanvas().style.cursor = 'pointer';
-      // Set variables equal to the current feature's magnitude, location, and time
+      // Set variables equal to the current feature's properties
       var landlordName = e.features[0].properties.owner;
       var propAddress = e.features[0].properties.address;
       var propValue = e.features[0].properties.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -172,7 +167,7 @@
 
       // Check whether features exist
       if (e.features.length > 0) {
-        // Display the magnitude, location, and time in the sidebar
+        // Display the info available for the property
         nameDisplay.textContent = landlordName;
         addressDisplay.textContent = propAddress;
         valueDisplay.textContent = propValue;
